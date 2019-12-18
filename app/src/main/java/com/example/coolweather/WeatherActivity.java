@@ -3,23 +3,25 @@ package com.example.coolweather;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.coolweather.gson.Forecast;
 import com.example.coolweather.gson.Weather;
 import com.example.coolweather.util.HttpUtil;
 import com.example.coolweather.util.Utility;
 
 import java.io.IOException;
-import java.util.prefs.PreferenceChangeListener;
-import java.util.prefs.Preferences;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -38,12 +40,24 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView comfortText;
     private TextView carWashText;
     private TextView sportText;
+    private ImageView bingPicImg;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weather);
         //初始化各控件
+
+        if (Build.VERSION.SDK_INT>=21 ) {//背景图和状态栏融合
+            View decorView = getWindow().getDecorView();
+            decorView.setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            getWindow().setStatusBarColor(Color.TRANSPARENT);
+        }
+
+        bingPicImg = (ImageView)findViewById(R.id.bing_pic_img);
+
         weatherLayout = (ScrollView)findViewById(R.id.weather_layout);
         titleCity = (TextView)findViewById(R.id.title_city);
         titleUpdateTime = (TextView)findViewById(R.id.title_update_time);
@@ -57,15 +71,22 @@ public class WeatherActivity extends AppCompatActivity {
         sportText = (TextView) findViewById(R.id.sport_text);
        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
                 String weatherSting = prefs.getString("weather",null);
-        if (weatherSting!=null){
+      //  if ( weatherSting!=null && ){
             //有缓存是直接解析天气数据
-            Weather weather = Utility.handleWeatherResponse(weatherSting);
-            showWeatherInfo(weather);
-        }else {
+      //      Weather weather = Utility.handleWeatherResponse(weatherSting);
+      //      showWeatherInfo(weather);
+      //  }else {
             //无缓存时服务查询天气
             String weatherId = getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
+       // }
+
+        String bingPic = prefs.getString("bing_Pic",null);
+        if (bingPic != null){
+            Glide.with(this).load(bingPic).into(bingPicImg);
+        }else {
+            loadBingPic();
         }
     }
 
@@ -73,7 +94,8 @@ public class WeatherActivity extends AppCompatActivity {
      * 根据天气id请求城市天气信息
      */
      public void requestWeather(final String weatherId){
-         String weatherUrl = "http://guolin.tech/api/weather?cityid=CN101190401";
+
+         String weatherUrl = "http://guolin.tech/api/weather?cityid="+weatherId;
          Toast.makeText(WeatherActivity.this,weatherId,Toast.LENGTH_LONG).show();
          HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
              @Override
@@ -104,7 +126,36 @@ public class WeatherActivity extends AppCompatActivity {
              });
              }
          });
+     loadBingPic();
      }
+
+    /**
+     * 加载每日必应图片
+     */
+
+    private void loadBingPic(){
+        String requestBingPic = "http://guolin.tech/api/bing_pic";
+        HttpUtil.sendOkHttpRequest(requestBingPic, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+             final String bingPic = response.body().string();
+             SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this).edit();
+             editor.putString("bing_pic",bingPic);
+             editor.apply();
+             runOnUiThread(new Runnable() {
+                 @Override
+                 public void run() {
+                     Glide.with(WeatherActivity.this).load(bingPic).into(bingPicImg);
+                 }
+             });
+            }
+        });
+    }
+
 
     /**
      * 处理并展示Weather实体类中的数据

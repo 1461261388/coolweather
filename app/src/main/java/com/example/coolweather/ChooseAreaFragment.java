@@ -53,12 +53,15 @@ public class ChooseAreaFragment extends Fragment {
     /**
      * 县列表
      */private List<County> countyList;
-
     /**
      * 选中的省份
      */private Province selectedProvince;
-    private City selectedCity;
-    private int currentLevel;
+    /**
+     * 选中的城市
+     */private City selectedCity;
+    /**
+     * 当前选中的等级
+     */private int currentLevel;
 
     @Nullable
     @Override
@@ -84,13 +87,13 @@ public class ChooseAreaFragment extends Fragment {
                 }else if ( currentLevel == LEVEL_CITY ){
                     selectedCity = cityList.get(position);
                     queryCounties();
-                }/*else if ( currentLevel == LEVEL_COUNTY ){
+                }else if ( currentLevel == LEVEL_COUNTY ){
                     String weatherId = countyList.get(position).getWeatherId();
                     Intent intent = new Intent(getActivity(),WeatherActivity.class);
                     intent.putExtra("weather_id", weatherId);
                     startActivity(intent);
                     getActivity().finish();
-                }*/
+                }
             }
         });
 
@@ -123,6 +126,7 @@ public class ChooseAreaFragment extends Fragment {
             listView.setSelection(0);
             currentLevel = LEVEL_PROVINCE;
         }else {
+
             String address = "http://guolin.tech/api/china";
             queryFromServer(address, "province");
         }
@@ -176,6 +180,7 @@ public class ChooseAreaFragment extends Fragment {
      * 根据传入的地址和类型从服务器上查询省市县数据
      */
     private void queryFromServer(String address, final String type){
+
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
             @Override
