@@ -135,8 +135,8 @@ public class ChooseAreaFragment extends Fragment {
     private void queryCities(){
         titleText.setText(selectedProvince.getProvinceName());
         backButton.setVisibility(View.VISIBLE);
-        cityList = DataSupport.where("provinceid = ?",String.valueOf(selectedProvince.getId())).find(City.class);
-        if (cityList.size()>0 ){
+        cityList = DataSupport.where("provinceid=?",String.valueOf(selectedProvince.getId())).find(City.class);
+        if ( cityList.size()>0 ){
             dataList.clear();
             for (City city : cityList){
                 dataList.add(city.getCityName());
@@ -173,11 +173,9 @@ public class ChooseAreaFragment extends Fragment {
             queryFromServer(address, "county");
         }
     }
-
     /**
      * 根据传入的地址和类型从服务器上查询省市县数据
      */
-
     private void queryFromServer(String address, final String type){
         showProgressDialog();
         HttpUtil.sendOkHttpRequest(address, new Callback() {
