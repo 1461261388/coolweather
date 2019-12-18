@@ -5,7 +5,7 @@ import android.text.TextUtils;
 import com.example.coolweather.db.City;
 import com.example.coolweather.db.County;
 import com.example.coolweather.db.Province;
-/*import com.example.coolweather.gson.Weather;*/
+//import com.example.coolweather.gson.Weather;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -44,7 +44,7 @@ public class Utility {
                         City city = new City();
                         city.setCityName(cityObject.getString("name"));
                         city.setCityCode(cityObject.getInt("id"));
-                        city.setProvinceId(provinceId);//这里是setProvinceId
+                        city.setProvinceId(provinceId);
                         city.save();
                     }
                     return true;
