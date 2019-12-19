@@ -1,4 +1,4 @@
-package com.example.coolweather;
+package com.example.coolweather.service;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
